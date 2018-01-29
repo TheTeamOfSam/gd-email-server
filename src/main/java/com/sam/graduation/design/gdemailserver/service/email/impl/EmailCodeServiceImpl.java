@@ -1,8 +1,9 @@
 package com.sam.graduation.design.gdemailserver.service.email.impl;
 
-import com.sam.graduation.design.gdemailserver.controller.dto.EmailCodeItem;
 import com.sam.graduation.design.gdemailserver.controller.dto.EmailResponseDto;
 import com.sam.graduation.design.gdemailserver.dao.EmailCodeMapper;
+import com.sam.graduation.design.gdemailserver.model.enums.EmailCodeStatus;
+import com.sam.graduation.design.gdemailserver.model.pojo.EmailCode;
 import com.sam.graduation.design.gdemailserver.service.base.BaseService;
 import com.sam.graduation.design.gdemailserver.service.email.EmailCodeService;
 import com.sun.mail.util.MailSSLSocketFactory;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -53,18 +56,31 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
     @Override
     public EmailResponseDto sendEmail(String toEmailAddress) {
         EmailResponseDto dto = new EmailResponseDto();
-
-        EmailCodeItem emailCodeItem = new EmailCodeItem();
-
+        // TODO: 先创建一个六位随机的带有大小字母和数字的验证码
         int characters_length = characters.length;
         String emailCode = "";
         for (int i = 0; i < 6; i++) {
             emailCode += characters[(int) (Math.ceil(Math.random() * characters_length) - 1)];
         }
-
+        // TODO: 发送验证码
         boolean sendResult = this.sendEmail(toEmailAddress, emailCode);
 
-        if (sendResult) {
+        // TODO: 保存数据库
+        EmailCode emailCodePO = new EmailCode();
+        emailCodePO.setEmail(toEmailAddress);
+        emailCodePO.setCode(emailCode);
+        emailCodePO.setGenerateTime(new Date());
+        emailCodePO.setStatus((byte) EmailCodeStatus.SEND_SUCCESS_BUT_NOT_IN_USE.value());
+        emailCodePO.setCreatedTime(new Date());
+        emailCodePO.setLastModifiedTime(new Date());
+        emailCodePO.setIsDelete((byte) 0);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date now = new Date();
+        emailCodePO.setExpirationTime(new Date(now.getTime() + 300000));
+        int saveResult = this.emailCodeMapper.insert(emailCodePO);
+
+        // TODO: 判断是否发送成功并成功保存到数据库
+        if (sendResult && (saveResult == 1)) {
             dto.setCode(emailCode);
             dto.setFeedbackMessage("验证码发送成功");
             dto.setSuccess(true);
@@ -78,7 +94,6 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
     }
 
     public boolean sendEmail(String to, String code) {
-        String from = fromEmailAddress;
         String host = smtpQqCom;
         Properties properties = System.getProperties();
         properties.setProperty(mailSmtpHost, host);
@@ -103,7 +118,7 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
             message.setFrom(new InternetAddress(fromEmailAddress));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
             message.setSubject("注册邮件");
-            message.setText("这是您的注册验证码：" + code);
+            message.setText("这是您的注册验证码：" + code + "。\n\n\n注意：过期时间为5分钟！");
             Transport.send(message);
             return true;
         } catch (Exception e) {
