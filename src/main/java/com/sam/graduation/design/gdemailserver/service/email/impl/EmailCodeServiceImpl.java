@@ -1,6 +1,5 @@
 package com.sam.graduation.design.gdemailserver.service.email.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.sam.graduation.design.gdemailserver.controller.dto.EmailResponseDto;
 import com.sam.graduation.design.gdemailserver.dao.EmailCodeMapper;
 import com.sam.graduation.design.gdemailserver.model.enums.EmailCodeStatus;
@@ -57,6 +56,22 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
     @Override
     public EmailResponseDto sendEmailCode(String toEmailAddress) {
         EmailResponseDto dto = new EmailResponseDto();
+        // TODO: 验证是否发送过于频繁
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date nowTime = new Date();
+        String toTime = sdf.format(nowTime);
+
+        Date from = new Date(nowTime.getTime() - 300000);
+        String fromTime = sdf.format(from);
+
+        int frequentlyCount = this.emailCodeMapper.selectCountByEmailBetweenTime(toEmailAddress, fromTime, toTime);
+        if (frequentlyCount > 2) {
+            dto = new EmailResponseDto();
+            dto.setFeedbackMessage("验证码获取过于频繁，五分钟内只允许三次！");
+            dto.setSuccess(false);
+            return dto;
+        }
+
         // TODO: 先创建一个六位随机的带有大小字母和数字的验证码
         int characters_length = characters.length;
         String emailCode = "";
@@ -83,7 +98,6 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
         emailCodePO.setCreatedTime(new Date());
         emailCodePO.setLastModifiedTime(new Date());
         emailCodePO.setIsDelete((byte) 0);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date now = new Date();
         emailCodePO.setExpirationTime(new Date(now.getTime() + 300000));
         int saveResult = this.emailCodeMapper.insert(emailCodePO);

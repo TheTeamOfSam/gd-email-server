@@ -17,4 +17,6 @@ public interface EmailCodeMapper {
     int updateByPrimaryKey(EmailCode record);
 
     EmailCode selectByEmailAndCodeOrderByGenerateTimeDesc(@Param("email") String email);
+
+    int selectCountByEmailBetweenTime(@Param("email") String email, @Param("from") String from, @Param("to") String to);
 }
