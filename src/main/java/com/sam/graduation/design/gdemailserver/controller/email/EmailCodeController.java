@@ -20,25 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 @Api("邮箱验证码发送及验证类")
 public class EmailCodeController extends BaseController {
 
-    @Autowired
-    private EmailCodeService emailCodeService;
+	@Autowired
+	private EmailCodeService emailCodeService;
 
-    @ApiOperation("邮箱验证码发送接口")
-    @RequestMapping(value = "/email/code/@send", method = RequestMethod.POST)
-    public EmailResponseDto emailCodeSend(
-            @RequestParam("email") String email
-    ) {
-        EmailResponseDto dto = this.emailCodeService.sendEmailCode(email);
-        return dto;
-    }
+	@ApiOperation("邮箱验证码发送接口")
+	@RequestMapping(value = "/email/code/@send", method = RequestMethod.POST)
+	public EmailResponseDto emailCodeSend(@RequestParam("email") String email) {
+		EmailResponseDto dto = this.emailCodeService.sendEmailCode(email);
+		return dto;
+	}
 
-    @ApiOperation("短信验证码验证接口")
-    @RequestMapping(value = "/email/code/@check", method = RequestMethod.POST)
-    public EmailResponseDto emailCodeCheck(
-            @RequestParam("email") String email,
-            @RequestParam("code") String code
-    ) {
-        return this.emailCodeService.checkEmailCode(email, code);
-    }
+	@ApiOperation("短信验证码验证接口")
+	@RequestMapping(value = "/email/code/@check", method = RequestMethod.POST)
+	public EmailResponseDto emailCodeCheck(@RequestParam("email") String email, @RequestParam("code") String code) {
+		EmailResponseDto dto = this.emailCodeService.checkEmailCode(email, code);
+		return dto;
+	}
 
 }
