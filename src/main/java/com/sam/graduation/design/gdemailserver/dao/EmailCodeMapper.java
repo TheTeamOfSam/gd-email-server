@@ -1,6 +1,7 @@
 package com.sam.graduation.design.gdemailserver.dao;
 
 import com.sam.graduation.design.gdemailserver.model.pojo.EmailCode;
+import org.apache.ibatis.annotations.Param;
 
 public interface EmailCodeMapper {
     int deleteByPrimaryKey(Long id);
@@ -14,4 +15,6 @@ public interface EmailCodeMapper {
     int updateByPrimaryKeySelective(EmailCode record);
 
     int updateByPrimaryKey(EmailCode record);
+
+    EmailCode selectByEmailAndCodeOrderByGenerateTimeDesc(@Param("email") String email);
 }

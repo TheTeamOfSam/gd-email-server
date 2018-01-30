@@ -17,7 +17,7 @@
     is_delete
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select 
+    select
     <include refid="Base_Column_List" />
     from email_code
     where id = #{id,jdbcType=BIGINT}
@@ -139,4 +139,13 @@
       is_delete = #{isDelete,jdbcType=TINYINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
+  <select id="selectByEmailAndCodeOrderByGenerateTimeDesc" parameterType="java.lang.String" resultMap="BaseResultMap">
+    SELECT *
+    FROM email_code
+      <if test="email != null">
+          WHERE email = #{email,jdbcType=VARCHAR}
+      </if>
+    ORDER BY generate_time DESC
+    LIMIT 0,1
+  </select>
 </mapper>

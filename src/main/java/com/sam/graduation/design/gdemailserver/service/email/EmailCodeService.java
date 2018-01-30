@@ -8,6 +8,8 @@ import com.sam.graduation.design.gdemailserver.controller.dto.EmailResponseDto;
  */
 public interface EmailCodeService {
 
-    EmailResponseDto sendEmail(String toEmailAddress);
+    EmailResponseDto sendEmailCode(String toEmailAddress);
+
+    EmailResponseDto checkEmailCode(String emailAddress, String emailCode);
 
 }

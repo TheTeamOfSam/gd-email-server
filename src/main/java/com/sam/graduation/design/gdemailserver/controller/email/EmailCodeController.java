@@ -28,12 +28,17 @@ public class EmailCodeController extends BaseController {
     public EmailResponseDto emailCodeSend(
             @RequestParam("email") String email
     ) {
-
-        EmailResponseDto dto = new EmailResponseDto();
-
-        dto = this.emailCodeService.sendEmail(email);
-
+        EmailResponseDto dto = this.emailCodeService.sendEmailCode(email);
         return dto;
+    }
+
+    @ApiOperation("短信验证码验证接口")
+    @RequestMapping(value = "/email/code/@check", method = RequestMethod.POST)
+    public EmailResponseDto emailCodeCheck(
+            @RequestParam("email") String email,
+            @RequestParam("code") String code
+    ) {
+        return this.emailCodeService.checkEmailCode(email, code);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.sam.graduation.design.gdemailserver.service.email.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.sam.graduation.design.gdemailserver.controller.dto.EmailResponseDto;
 import com.sam.graduation.design.gdemailserver.dao.EmailCodeMapper;
 import com.sam.graduation.design.gdemailserver.model.enums.EmailCodeStatus;
@@ -54,7 +55,7 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
     private EmailCodeMapper emailCodeMapper;
 
     @Override
-    public EmailResponseDto sendEmail(String toEmailAddress) {
+    public EmailResponseDto sendEmailCode(String toEmailAddress) {
         EmailResponseDto dto = new EmailResponseDto();
         // TODO: 先创建一个六位随机的带有大小字母和数字的验证码
         int characters_length = characters.length;
@@ -64,6 +65,14 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
         }
         // TODO: 发送验证码
         boolean sendResult = this.sendEmail(toEmailAddress, emailCode);
+
+        // TODO: 判断是否发送成功并成功保存到数据库
+        if (!sendResult) {
+            dto.setCode(null);
+            dto.setFeedbackMessage("验证码发送失败，请检查邮箱格式");
+            dto.setSuccess(false);
+            return dto;
+        }
 
         // TODO: 保存数据库
         EmailCode emailCodePO = new EmailCode();
@@ -79,18 +88,18 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
         emailCodePO.setExpirationTime(new Date(now.getTime() + 300000));
         int saveResult = this.emailCodeMapper.insert(emailCodePO);
 
-        // TODO: 判断是否发送成功并成功保存到数据库
-        if (sendResult && (saveResult == 1)) {
+        if (saveResult == 1) {
             dto.setCode(emailCode);
             dto.setFeedbackMessage("验证码发送成功");
             dto.setSuccess(true);
             return dto;
         } else {
             dto.setCode(null);
-            dto.setFeedbackMessage("验证码发送失败");
+            dto.setFeedbackMessage("系统异常，验证码发送失败");
             dto.setSuccess(false);
             return dto;
         }
+
     }
 
     public boolean sendEmail(String to, String code) {
@@ -125,5 +134,59 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
             logger.error("e:{}!", e);
         }
         return false;
+    }
+
+    @Override
+    public EmailResponseDto checkEmailCode(String emailAddress, String emailCode) {
+        EmailResponseDto dto = null;
+
+        EmailCode emailCodePO = this.emailCodeMapper.selectByEmailAndCodeOrderByGenerateTimeDesc(emailAddress);
+
+        // TODO: 验证邮箱状态
+        if (emailCodePO.getStatus() == EmailCodeStatus.SEND_SUCCESS_AND_IN_USE.value()) {
+            dto = new EmailResponseDto();
+            dto.setFeedbackMessage("此邮箱已经通过验证");
+            dto.setSuccess(false);
+            return dto;
+        } else if (emailCodePO.getStatus() == EmailCodeStatus.SEND_SUCCESS_BUT_NOT_IN_USE.value()) {
+            // TODO: 验证验证是否正确
+            if (!emailCode.equals(emailCodePO.getCode())) {
+                dto = new EmailResponseDto();
+                dto.setFeedbackMessage("邮箱验证码不正确，请重新输入！");
+                dto.setSuccess(false);
+                return dto;
+            }
+
+            // TODO: 验证验证码是否已过期
+            if ((new Date()).after(emailCodePO.getExpirationTime())) {
+                dto = new EmailResponseDto();
+                dto.setFeedbackMessage("此验证码已过期，请重新获取！");
+                dto.setSuccess(false);
+                return dto;
+            }
+
+            // TODO: 未过期，说明已经符合条件允许，可以通过验证
+            emailCodePO.setStatus((byte) EmailCodeStatus.SEND_SUCCESS_AND_IN_USE.value());
+            emailCodePO.setLastModifiedTime(new Date());
+            int updateStatusResult = this.emailCodeMapper.updateByPrimaryKeySelective(emailCodePO);
+
+            if (updateStatusResult == 1) {
+                dto = new EmailResponseDto();
+                dto.setSuccess(true);
+                dto.setFeedbackMessage("恭喜，验证通过");
+                return dto;
+            } else {
+                dto = new EmailResponseDto();
+                dto.setSuccess(false);
+                dto.setFeedbackMessage("验证失败");
+                return dto;
+            }
+
+        } else {
+            dto = new EmailResponseDto();
+            dto.setSuccess(false);
+            dto.setFeedbackMessage("验证失败，请再次重试！");
+            return dto;
+        }
     }
 }
