@@ -36,14 +36,6 @@ public class EmailCodeController extends BaseController {
             dto.setSuccess(false);
             return dto;
         }
-        String emailRegex = "[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[\\w](?:[\\w-]*[\\w])?";
-        if (!email.matches(emailRegex)) {
-            EmailResponseDto dto = new EmailResponseDto();
-            dto.setCode(null);
-            dto.setFeedbackMessage("亲，邮箱格式不正确！");
-            dto.setSuccess(false);
-            return dto;
-        }
         EmailResponseDto dto = this.emailCodeService.sendEmailCode(email);
         return dto;
     }
@@ -65,14 +57,6 @@ public class EmailCodeController extends BaseController {
             EmailResponseDto dto = new EmailResponseDto();
             dto.setCode(null);
             dto.setFeedbackMessage("亲，请输入验证码！");
-            dto.setSuccess(false);
-            return dto;
-        }
-        String emailRegex = "[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[\\w](?:[\\w-]*[\\w])?";
-        if (!email.matches(emailRegex)) {
-            EmailResponseDto dto = new EmailResponseDto();
-            dto.setCode(null);
-            dto.setFeedbackMessage("亲，邮箱格式不正确");
             dto.setSuccess(false);
             return dto;
         }
