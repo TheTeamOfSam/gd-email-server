@@ -187,6 +187,9 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
 
 		EmailCode emailCodePO = this.emailCodeMapper.selectByEmailAndCodeOrderByGenerateTimeDesc(emailAddress);
 
+
+
+
 		// TODO: 验证邮箱状态
 		if (emailCodePO.getStatus() == EmailCodeStatus.SEND_SUCCESS_AND_IN_USE.value()) {
 			dto = new EmailResponseDto();
