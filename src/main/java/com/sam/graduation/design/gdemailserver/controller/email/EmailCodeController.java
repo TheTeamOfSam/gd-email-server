@@ -40,6 +40,22 @@ public class EmailCodeController extends BaseController {
         return dto;
     }
 
+    @ApiOperation("重置密码的邮箱验证码发送接口")
+    @RequestMapping(value = "/reset/password/email/code/@send", method = RequestMethod.POST)
+    public EmailResponseDto resetPasswordEmailCodeSend(
+            @RequestParam(value = "email", required = false) String email
+    ) {
+        if (StringUtils.isBlank(email)) {
+            EmailResponseDto dto = new EmailResponseDto();
+            dto.setCode(null);
+            dto.setFeedbackMessage("亲，请输入邮箱！");
+            dto.setSuccess(false);
+            return dto;
+        }
+        EmailResponseDto dto = this.emailCodeService.sendResetPasswordEmailCode(email);
+        return dto;
+    }
+
     @ApiOperation("短信验证码验证接口")
     @RequestMapping(value = "/email/code/@check", method = RequestMethod.POST)
     public EmailResponseDto emailCodeCheck(

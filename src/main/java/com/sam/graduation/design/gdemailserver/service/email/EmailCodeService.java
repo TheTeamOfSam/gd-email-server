@@ -10,6 +10,8 @@ public interface EmailCodeService {
 
     EmailResponseDto sendEmailCode(String toEmailAddress);
 
+    EmailResponseDto sendResetPasswordEmailCode(String toEmailAddress);
+
     EmailResponseDto checkEmailCode(String emailAddress, String emailCode);
 
 }
