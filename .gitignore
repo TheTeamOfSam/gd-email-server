@@ -31,3 +31,4 @@ target/test-classes/com/sam/graduation/design/gdemailserver/GdEmailServerApplica
 gd-email-server.iml
 .classpath
 .project
+mvnw
