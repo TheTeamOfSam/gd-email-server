@@ -29,3 +29,4 @@ target/classes/generatorConfig.xml
 target/classes/logback-spring.xml
 target/test-classes/com/sam/graduation/design/gdemailserver/GdEmailServerApplicationTests.class
 gd-email-server.iml
+.classpath
