@@ -56,7 +56,7 @@ public class EmailCodeController extends BaseController {
         return dto;
     }
 
-    @ApiOperation("短信验证码验证接口")
+    @ApiOperation("邮件验证码验证接口")
     @RequestMapping(value = "/email/code/@check", method = RequestMethod.POST)
     public EmailResponseDto emailCodeCheck(
             @RequestParam(value = "email", required = false) String email,
