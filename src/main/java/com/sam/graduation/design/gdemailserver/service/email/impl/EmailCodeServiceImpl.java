@@ -308,7 +308,7 @@ public class EmailCodeServiceImpl extends BaseService implements EmailCodeServic
             return dto;
         } else if (emailCodePO.getStatus() == EmailCodeStatus.SEND_SUCCESS_BUT_NOT_IN_USE.value()) {
             // TODO: 验证验证是否正确
-            if (!emailCode.equals(emailCodePO.getCode())) {
+            if (!emailCode.toLowerCase().equals(emailCodePO.getCode().toLowerCase())) {
                 dto = new EmailResponseDto();
                 dto.setFeedbackMessage("邮箱验证码不正确，请重新输入！");
                 dto.setSuccess(false);
